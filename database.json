@@ -1,0 +1,10 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "root",
+    "database": "crate",
+    "host": "127.0.0.1",
+    "dialect": "postgresql",
+    "seederStorage": "sequelize"
+  }
+}
