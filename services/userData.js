@@ -1,7 +1,6 @@
 const randomUUID = require('uuid');
-const sequelize = require('../../models/index');
+const sequelize = require('../models');
 const bcrypt = require('bcrypt');
-const migration = require('../../migrations/20220203125448-create-user');
 
 exports.getAll = async ctx => {
   return sequelize.User.findAll();
@@ -74,7 +73,6 @@ exports.updateAge = async (username, age) => {
 };
 
 exports.addAgeColumn = async () => {
-  const users = await sequelize.User.findAll();
-  await migration.up(users);
-  return users;
+  await migration.up();
+  return 'Success';
 };

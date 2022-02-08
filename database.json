@@ -2,9 +2,10 @@
   "development": {
     "username": "postgres",
     "password": "root",
-    "database": "crate",
+    "database": "users_db",
     "host": "127.0.0.1",
-    "dialect": "postgresql",
+    "port": "5432",
+    "driver": "postgresql",
     "seederStorage": "sequelize"
   }
 }

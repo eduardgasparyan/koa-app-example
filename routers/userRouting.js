@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 const router = new Router();
-const db = require('../../services/users/userData');
+const db = require('../services/userData');
 
 router.get('/', async ctx => {
   return 'HomePage';
