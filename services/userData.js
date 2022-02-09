@@ -1,6 +1,20 @@
 const randomUUID = require('uuid');
 const sequelize = require('../models');
 const bcrypt = require('bcrypt');
+// const jwt = require('jsonwebtoken');
+// const tokenKey = toString(process.env.TOKEN_SECRET);
+// const generateAccessToken = async username => {
+//   return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
+// };
+
+function checkProperties(data, user) {
+  for (let key in data) {
+    if (data[key] !== undefined) {
+      user[key] = data[key];
+    }
+  }
+  return user;
+}
 
 exports.getAll = async ctx => {
   return sequelize.User.findAll();
@@ -13,16 +27,26 @@ exports.getOne = async username => {
   return user;
 };
 
-exports.createOne = async (username, password, email) => {
+exports.createOne = async data => {
+  // const candidate = sequelize.User.findOne(username);
+  // if (candidate) {
+  //   throw new Error(`Candidate with this email already registrated!`);
+  // }
   const id = randomUUID();
   const salt = await bcrypt.genSalt(10);
-  const pass = await bcrypt.hash(password, salt);
+  const pass = await bcrypt.hash(data.password, salt);
+  // const generatedToken = await generateAccessToken(
+  //   username,
+  //   process.env.TOKEN_SECRET,
+  //   { expiersIn: '1800s' },
+  // );
   const newUser = {
-    username: username,
+    username: data.username,
     password: pass,
-    salt: salt,
-    email: email,
+    email: data.email,
     id: id,
+    salt: salt,
+    // token: generatedToken,
   };
   try {
     await sequelize.User.create(newUser);
@@ -33,17 +57,17 @@ exports.createOne = async (username, password, email) => {
   }
 };
 
-exports.login = async (username, password) => {
+exports.login = async data => {
   const user = await sequelize.User.findOne({
     where: {
-      username: username,
+      username: data.username,
     },
   });
   const hashedPassword = user.password;
-  const newHashedPassword = await bcrypt.hash(password, user.salt);
+  const newHashedPassword = await bcrypt.hash(data.password, user.salt);
   if (hashedPassword === newHashedPassword) {
-    return console.log('logged');
-  } else return console.log('false');
+    return user;
+  } else throw new Error('Invalid username or password');
 };
 
 exports.deleteOne = async param => {
@@ -54,25 +78,13 @@ exports.deleteOne = async param => {
   return sequelize.User.findAll();
 };
 
-exports.updateAge = async (username, age) => {
-  const user = await sequelize.User.findOne({
+exports.update = async (username, data) => {
+  let user = await sequelize.User.findOne({
     where: {
       username: username,
     },
   });
-  user.age = age;
-  await sequelize.User.destroy({
-    where: { id: user.id },
-  });
-  await sequelize.User.create(user);
-  return console.log(
-    await sequelize.User.findOne({
-      where: { id: user.id },
-    }),
-  );
-};
-
-exports.addAgeColumn = async () => {
-  await migration.up();
-  return 'Success';
+  user = checkProperties(data, user);
+  await user.save();
+  return user;
 };

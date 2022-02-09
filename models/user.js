@@ -52,6 +52,9 @@ module.exports = (sequelize, DataTypes) => {
     salt: {
       type: DataTypes.STRING,
     },
+    Token: {
+      type: DataTypes.STRING,
+    },
   });
 
   return User;
