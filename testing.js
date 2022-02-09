@@ -10,6 +10,3 @@ const user = {
   password: '124124124',
   email: 'testst@gmail.com',
 };
-
-
-checkProperties(obj, user);
