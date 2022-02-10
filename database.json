@@ -5,7 +5,7 @@
     "database": "users_db",
     "host": "127.0.0.1",
     "port": "5432",
-    "driver": "postgresql",
-    "seederStorage": "sequelize"
+    "seederoStorage": "sequelize",
+    "dialect": "postgres"
   }
 }
