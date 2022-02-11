@@ -2,6 +2,7 @@ const Router = require('koa-router');
 const router = new Router();
 const db = require('../services/userData');
 const au = require('../services/auth');
+const car = require('../services/userCars');
 
 router.get('/', async ctx => {
   return 'HomePage';
@@ -49,4 +50,46 @@ router.get(`/logout/:username`, async ctx => {
   return au.logout(data);
 });
 
+router.post(`/:username/addCar`, async ctx => {
+  const data = {
+    username: ctx.params,
+    bodyParsed: ctx.request.body,
+    accessToken: ctx.request.headers.authorization,
+  };
+  if (await au.verifyToken(data.accessToken, data.username))
+    return car.addingCar(data);
+  else throw new Error('Verification false');
+});
+
+router.get(`/:username/cars`, async ctx => {
+  const data = {
+    username: ctx.params,
+    accessToken: ctx.request.headers.authorization,
+  };
+  if (await au.verifyToken(data.accessToken, data.username))
+    return car.userCars(data.username);
+  else throw new Error('Verification false');
+});
+
+router.post(`/:username/deleteCar`, async ctx => {
+  const data = {
+    username: ctx.params,
+    accessToken: ctx.request.headers.authorization,
+    carName: ctx.request.body,
+  };
+  if (await au.verifyToken(data.accessToken, data.username))
+    return car.deleteCar(data);
+  else throw new Error('Verification false');
+});
+
+router.post(`/:username/changeCar`, async ctx => {
+  const data = {
+    username: ctx.params,
+    accessToken: ctx.request.headers.authorization,
+    carName: ctx.request.body,
+  };
+  if (await au.verifyToken(data.accessToken, data.username))
+    return car.changeCar(data);
+  else throw new Error('Verification false');
+});
 module.exports = router;

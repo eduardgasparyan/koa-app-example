@@ -1,4 +1,3 @@
-const path = require('path');
 const Koa = require('koa');
 const dotenv = require('dotenv');
 dotenv.config();

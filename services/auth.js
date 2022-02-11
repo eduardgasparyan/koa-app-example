@@ -4,7 +4,6 @@ const randomUUID = require('uuid');
 const bcrypt = require('bcrypt');
 const accessSecretKey = process.env.ACCESS_TOKEN_SECRET;
 const refreshSecretKey = process.env.REFRESH_TOKEN_SECRET;
-console.log({ table: sequelize.User });
 
 const generateAccessToken = async accessTokenData => {
   return jwt.sign({ accessTokenData }, accessSecretKey, { expiresIn: '30m' });
@@ -69,7 +68,7 @@ exports.login = async data => {
       accessToken: await generateAccessToken(accessTokenData),
     };
     const token = {
-      id: user.id,
+      token_id: user.id,
       token: tokens.refreshToken,
     };
     await sequelize.tokenTable.create(token);
@@ -94,7 +93,9 @@ exports.generateNewAccessToken = async data => {
   const user = await sequelize.User.findOne({
     where: { username: decoded.refreshTokenData.username },
   });
-  const userToken = await sequelize.tokenTable.findByPk(user.id);
+  const userToken = await sequelize.tokenTable.findOne({
+    where: { token_id: user.id },
+  });
   try {
     if (data.authorization === userToken.token) {
       const date = new Date();
@@ -121,7 +122,7 @@ exports.logout = async data => {
     },
   });
   await sequelize.tokenTable.destroy({
-    where: { id: user.id },
+    where: { token_id: user.id },
     force: true,
   });
 };
