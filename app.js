@@ -1,9 +1,13 @@
+const path = require('path');
 const Koa = require('koa');
+const dotenv = require('dotenv');
+dotenv.config();
 const app = new Koa();
 const router = require('./routers/userRouting');
 const db = require('./models/index');
 const { sequelize } = db;
 const koaBody = require('koa-body');
+
 const PORT = process.env.PORT || 3000;
 
 app.use(koaBody());
