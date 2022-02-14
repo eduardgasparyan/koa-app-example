@@ -1,6 +1,6 @@
 const sequelize = require('../models');
 
-async function checkProperties(data, user) {
+async function updateProperties(data, user) {
   for (let key in data) {
     if (data[key] !== undefined) {
       user[key] = data[key];
@@ -10,31 +10,26 @@ async function checkProperties(data, user) {
 }
 
 exports.getAll = async ctx => {
-  return sequelize.User.findAll();
+  return sequelize.Users.findAll();
 };
 
-exports.getOne = async data => {
-  const user = await sequelize.User.findOne({
-    where: { username: data.username },
-  });
+exports.getOne = async ({ params }) => {
+  console.log(params);
+  const user = await sequelize.Users.findByPk(params.id);
   return user;
 };
 
-exports.deleteOne = async param => {
-  await sequelize.User.destroy({
-    where: { username: param },
+exports.deleteOne = async ({ params }) => {
+  const user = await sequelize.Users.findByPk(params.id);
+  await sequelize.Users.destroy({
+    where: { username: user.username },
     force: true,
   });
-  return sequelize.User.findAll();
 };
 
-exports.update = async (username, data) => {
-  let user = await sequelize.User.findOne({
-    where: {
-      username: username,
-    },
-  });
-  user = await checkProperties(data, user);
+exports.update = async ({ bodyParsed, params }) => {
+  let user = await sequelize.Users.findByPk(params.id);
+  user = await updateProperties(bodyParsed, user);
   user.updatedAt = new Date();
   user.updatedAt.getDate();
   await user.save();

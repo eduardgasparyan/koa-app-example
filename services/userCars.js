@@ -1,64 +1,43 @@
 const sequelize = require('../models');
+const randomUUID = require('uuid');
 
-exports.addingCar = async data => {
-  const user = await sequelize.User.findOne({
+exports.addCar = async ({ bodyParsed, params }) => {
+  const databaseCarCheck = await sequelize.Cars.findOne({
     where: {
-      username: data.username.username,
+      UserId: params.id,
+      car: bodyParsed.car,
     },
   });
-  const databaseCarCheck = await sequelize.car.findOne({
-    where: {
-      car: data.bodyParsed.car,
-    },
-  });
-  if (databaseCarCheck !== null) {
-    if (user.id !== databaseCarCheck.car_id) {
-      const carData = {
-        car_id: user.id,
-        car: data.bodyParsed.car,
-      };
-      await sequelize.car.create(carData);
-    } else throw new Error('Car already exists');
-  } else {
+  if (databaseCarCheck === null) {
     const carData = {
-      car_id: user.id,
-      car: data.bodyParsed.car,
+      UserId: params.id,
+      car_id: randomUUID(),
+      car: bodyParsed.car,
     };
-    await sequelize.car.create(carData);
-    return carData.car;
-  }
+    await sequelize.Cars.create(carData);
+  } else throw new Error('Car already exists');
 };
 
-exports.userCars = async data => {
-  const user = await sequelize.User.findOne({
-    where: { username: data.username },
-  });
-  const carsFromDatabase = await sequelize.car.findAll({
-    where: { car_id: user.id },
+exports.userCars = async ({ params }) => {
+  return sequelize.Cars.findAll({
+    where: { UserId: params.id },
     attributes: ['car'],
   });
-  return carsFromDatabase;
 };
 
-exports.deleteCar = async data => {
-  const user = await sequelize.User.findOne({
-    where: { username: data.username.username },
-  });
-  const carCheck = await sequelize.car.findOne({
-    where: { car_id: user.id, car: data.carName.car },
-  });
-  if (!carCheck) throw new Error('Car not found');
-  await carCheck.destroy({ force: true });
+exports.deleteCar = async ({ params }) => {
+  if (
+    !(await sequelize.Cars.destroy({
+      where: { UserId: params.id, car_id: params.car_id },
+      force: true,
+    }))
+  )
+    throw new Error('Car not found');
 };
 
-exports.changeCar = async data => {
-  const user = await sequelize.User.findOne({
-    where: { username: data.username.username },
-  });
-  const carCheck = await sequelize.car.findOne({
-    where: { car_id: user.id, car: data.carName.carInDatabase },
-  });
-  if (!carCheck) throw new Error('Car not found');
-  carCheck.car = data.carName.changeCar;
-  carCheck.save();
+exports.changeCar = async ({ params, bodyParsed }) => {
+  const carInDatabase = await sequelize.Cars.findByPk(params.car_id);
+  if (!carInDatabase) throw new Error('Car not found');
+  carInDatabase.car = bodyParsed.car;
+  carInDatabase.save();
 };
